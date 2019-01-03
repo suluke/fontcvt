@@ -3,7 +3,7 @@ import CharApproximator, { CharApproximation } from './algorithm.js';
 
 const Bounds = { width: 12, height: 18 };
 const NumLineElts = 4;
-const NumLines = 32
+const NumLines = 32;
 
 const ASCII = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 const Font = 'serif';
@@ -173,10 +173,19 @@ class Visualizer {
       this.renderRemaining();
       return;
     }
-    const loss = this.approximation.getLoss();
+    const { approximation } = this;
+    const loss = approximation.getLoss();
     if (loss < 0.05)
       return;
-    this.approximation.addNewLine();
+    if (approximation.lines.length >= width * height)
+      return
+    // FIXME detect no-change situations before we try adding a new
+    // line
+    const numLinesBefore = approximation.lines.length;
+    approximation.addNewLine();
+    const numLinesAfter = approximation.lines.length;
+    if (numLinesAfter === numLinesBefore)
+      return;
     this.renderRemaining();
     this.renderLines();
   }
