@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    Usage: Enter a character below and press the button as often as you like<br/>
+    <input type="text" id="fontcvt-input-char"/>
+    <button type="button" id="fontcvt-btn-submit">GO!</button>
+    <br/>
+    <canvas id="fontcvt-canvas-grayscale"></canvas>
+    <canvas id="fontcvt-canvas-remaining"></canvas>
+    <canvas id="fontcvt-canvas-lines"></canvas>
+    Lines: <span id="fontcvt-text-numlines"></span>
+    Loss: <span id="fontcvt-text-loss"></span>
+    <br/>
+    <script type="module" src="./utils.js"></script>
+    <script type="module" src="./algorithm.js"></script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
