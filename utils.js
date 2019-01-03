@@ -1,3 +1,5 @@
+import MersenneTwister from './mersenne-twister.js';
+
 export function grayscaleFromCtx(ctx, width, height) {
   const img = ctx.getImageData(0, 0, width, height);
   const grayscale = []; //new Uint8Array(img.data.length / 4 /* rgba */);
@@ -15,13 +17,21 @@ export function grayscaleFromCtx(ctx, width, height) {
   return grayscale;
 }
 
+export function intToCSSRgb(i) {
+  const rand = new MersenneTwister(i);
+  const bin = rand.random_int31();
+  const r = (bin & 0xff0000) >> 16;
+  const g = (bin & 0x00ff00) >>  8;
+  const b = (bin & 0x0000ff) >>  0;
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 export function drawLinesToCtx(lines, ctx, width, height) {
   ctx.clearRect(0, 0, width, height);
   const n = lines.length;
 
   for (let i = 0; i < n; i++) {
     const line = lines[i];
-    ctx.strokeStyle = "rgb(" + lerp(255, 0, i/n) + ", " + lerp(0, 255, i/n) + ", 0)";
     drawLineToCtx(line, ctx, width, height)
   }
 }

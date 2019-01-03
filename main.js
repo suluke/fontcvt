@@ -1,4 +1,4 @@
-import { drawLinesToCtx } from './utils.js';
+import { drawLinesToCtx, drawLineToCtx, intToCSSRgb } from './utils.js';
 import CharApproximator, { CharApproximation } from './algorithm.js';
 
 const Bounds = { width: 12, height: 18 };
@@ -19,6 +19,7 @@ class FontConverter {
       const linesCanvas = this.makeLinesCanvas(algolines);
       document.body.appendChild(linesCanvas);
       //document.body.appendChild(document.createElement('br'));
+      this.colorize = false;
     }
   }
   makeCharCanvas(char) {
@@ -39,7 +40,16 @@ class FontConverter {
     canvas.height = height;
     const ctx = canvas.getContext('2d');
     ctx.lineWidth = 1;
-    drawLinesToCtx(lines, ctx, width, height);
+    if (this.colorize) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        ctx.strokeStyle = intToCSSRgb(i);
+        drawLineToCtx(line, ctx, width, height);
+      }
+    } else {
+      ctx.strokeStyle = 'black';
+      drawLinesToCtx(lines, ctx, width, height);
+    }
     return canvas;
   }
 }
@@ -72,6 +82,8 @@ class Visualizer {
     this.currentChar = '';
     this.grayscale = null;
     this.approximation = null;
+
+    this.colorize = true;
 
     submitBtn.addEventListener('click', () => this.nextStep());
   }
@@ -128,7 +140,16 @@ class Visualizer {
     const { lines } = approximation;
     const { width, height } = Bounds;
     linesCtx.clearRect(0, 0, width, height);
-    drawLinesToCtx(lines, linesCtx, width, height);
+    if (this.colorize) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        linesCtx.strokeStyle = intToCSSRgb(i);
+        drawLineToCtx(line, linesCtx, width, height);
+      }
+    } else {
+      linesCtx.strokeStyle = 'black';
+      drawLinesToCtx(lines, linesCtx, width, height);
+    }
     numLinesDisplay.innerHTML = `${lines.length}`;
   }
 
