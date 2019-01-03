@@ -16,14 +16,21 @@ export function grayscaleFromCtx(ctx, width, height) {
 }
 
 export function drawLinesToCtx(lines, ctx, width, height) {
-  ctx.beginPath()
   ctx.clearRect(0, 0, width, height);
-  for (let i = 0; i < lines.length; i++) {
+  const n = lines.length;
+
+  for (let i = 0; i < n; i++) {
     const line = lines[i];
-    const [x0, y0, x1, y1] = line.map(function(c) { return c + 0.5; });
-    ctx.moveTo(x0 * width, y0 * height);
-    ctx.lineTo(x1 * width, y1 * height);
+    ctx.strokeStyle = "rgb(" + lerp(255, 0, i/n) + ", " + lerp(0, 255, i/n) + ", 0)";
+    drawLineToCtx(line, ctx, width, height)
   }
+}
+
+export function drawLineToCtx(line, ctx, width, height) {
+  ctx.beginPath();
+  const [x0, y0, x1, y1] = line.map(function(c) { return c + 0.5; });
+  ctx.moveTo(x0 * width, y0 * height);
+  ctx.lineTo(x1 * width, y1 * height);
   ctx.closePath();
   ctx.stroke();
 }
@@ -55,4 +62,8 @@ export function pointToLineDist(p, v, w) {
   const projection = { x: v.x + t * (w.x - v.x),
                        y: v.y + t * (w.y - v.y) };
   return distance(p, projection);
+}
+
+export function lerp(x, y, t) {
+  return (1 - t) * x + t * y;
 }
