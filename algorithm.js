@@ -1,4 +1,5 @@
 import { drawLinesToCtx, grayscaleFromCtx, pointToLineDist } from './utils.js';
+import PriorityQueue from './priority-queue.js';
 
 class Cover {
   constructor(newCover = 0, totalCover = 0) {
@@ -20,6 +21,19 @@ export class CharApproximation {
     this.remainingInk = grayscale.slice();
     this.allInk = grayscale.slice();
     this.strokeWidth = strokeWidth;
+    this.pixelPriorities = new PriorityQueue({
+      comparator: (a, b) => {
+        const ink = this.remainingInk;
+        return ink[b] - ink[a];
+      },
+      initialValues: grayscale.map(function(_, idx) { return idx; })
+    });
+  }
+  selectStartPixel() {
+    const { pixelPriorities } = this;
+    pixelPriorities.update();
+    const idx = pixelPriorities.dequeue();
+    return idx;
   }
   visitLinePixels(visitor, line) {
     const vec = { dx: line.x1 - line.x0, dy: line.y1 - line.y0 }
@@ -87,13 +101,6 @@ export class CharApproximation {
       const remainingCover = Math.min(this.remainingInk[idx], maxCover);
       this.remainingInk[idx] -= remainingCover;
     }, line);
-  }
-  selectStartPixel() {
-    const ink = this.remainingInk;
-    // TODO use real priority queue with efficiently updateable priorities
-    const queue = ink.map((_, idx) => idx)
-                     .sort((a, b) => ink[a] - ink[b]);
-    return queue.pop();
   }
   addNewLine() {
     const idx = this.selectStartPixel();
