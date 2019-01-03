@@ -132,7 +132,7 @@ class Visualizer {
       imgData.data[4 * i + 3] = 255;
     }
     remainingCtx.putImageData(imgData, 0, 0);
-    lossDisplay.innerHTML = `${approximation.getLoss()}`;
+    lossDisplay.innerHTML = `${approximation.getLoss().toFixed(3)}`;
   }
 
   renderLines() {
