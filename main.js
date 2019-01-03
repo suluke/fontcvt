@@ -8,39 +8,42 @@ const NumLines = 32
 const ASCII = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 const Font = 'serif';
 
-function makeCharCanvas(char) {
-  const { width, height } = Bounds;
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  ctx.lineWidth = 1;
-  ctx.font = `${width}px ${Font}`;
-  ctx.fillText(char, 0, height * .75);
-  return canvas;
+class FontConverter {
+  constructor() {
+    this.charcvt = new CharApproximator(Bounds.width, Bounds.height, NumLines);
+    for (let i = 0; i < ASCII.length; i++) {
+      const char = ASCII.charAt(i);
+      const charCanvas = this.makeCharCanvas(char);
+      document.body.appendChild(charCanvas);
+      const algolines = this.charcvt.approximate(char, Font);
+      const linesCanvas = this.makeLinesCanvas(algolines);
+      document.body.appendChild(linesCanvas);
+      //document.body.appendChild(document.createElement('br'));
+    }
+  }
+  makeCharCanvas(char) {
+    const { width, height } = Bounds;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.lineWidth = 1;
+    ctx.font = `${width}px ${Font}`;
+    ctx.fillText(char, 0, height * .75);
+    return canvas;
+  }
+  makeLinesCanvas(lines) {
+    const { width, height } = Bounds;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.lineWidth = 1;
+    drawLinesToCtx(lines, ctx, width, height);
+    return canvas;
+  }
 }
-
-function showLines(lines) {
-  const { width, height } = Bounds;
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  ctx.lineWidth = 1;
-  document.body.appendChild(canvas);
-  drawLinesToCtx(lines, ctx, width, height);
-}
-
-const charcvt = new CharApproximator(Bounds.width, Bounds.height, NumLines);
-
-for (let i = 0; i < ASCII.length; i++) {
-  const char = ASCII.charAt(i);
-  const canvas = makeCharCanvas(char);
-  document.body.appendChild(canvas);
-  const algolines = charcvt.approximate(char, Font);
-  showLines(algolines);
-  //document.body.appendChild(document.createElement('br'));
-}
+new FontConverter();
 
 class Visualizer {
   constructor() {
@@ -92,7 +95,7 @@ class Visualizer {
     const { grayscaleCtx } = this;
     const { width, height } = Bounds;
     const char = this.currentChar;
-    const grayscale = charcvt.convertToGrayscale(char, Font);
+    const grayscale = this.charcvt.convertToGrayscale(char, Font);
     const imgData = grayscaleCtx.createImageData(width, height);
     for (let i = 0; i < grayscale.length; i++) {
       imgData.data[4 * i + 0] = 255 - grayscale[i] * 255;
