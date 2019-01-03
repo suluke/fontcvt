@@ -35,18 +35,42 @@ export class CharApproximation {
     const idx = pixelPriorities.dequeue();
     return idx;
   }
+  /// This function iterates over the pixels that (probably) get drawn
+  /// on when rasterizing the line and calls the provided visitor with
+  /// the pixels' coordinates as arguments (once per pixel).
+  /// It is totally ok if this function over-approximates the pixels
+  /// since clients are expected to check for the actual distance of
+  /// the pixel to the line. However, it is not ok to visit a pixel
+  /// more than once. Under-approximation is also detrimental.
+  /// Clients can stop the iteration process at any time by returning
+  /// `false` from the provided visitor.
+  /// For convenience and efficiency, the pixel index (i.e. x + width * y)
+  /// is provided as third parameter to the visitor as well.
   visitLinePixels(visitor, line) {
     const vec = { dx: line.x1 - line.x0, dy: line.y1 - line.y0 }
+    if (vec.dx === 0 && vec.dy === 0) {
+      const x = Math.floor(line.x0);
+      const y = Math.floor(line.y0);
+      const idx = x + this.width * y;
+      visitor(x, y, idx);
+      return;
+    }
     const len = Math.sqrt(Math.pow(vec.dx, 2) + Math.pow(vec.dy, 2));
     const unit = { dx: vec.dx / len, dy: vec.dy / len };
-    const ortho = { dx: unit.dy, dx: -unit.dx };
+    const ortho = { dx: unit.dy, dy: -unit.dx };
+    // Using a Set makes it easy to comply with the pixel uniqueness
+    // requirement
     const indices = new Set();
     const addPixel = (x, y) => {
+      x = Math.floor(x);
+      y = Math.floor(y);
       if (x < 0 || x >= this.width)
         return
       if (y < 0 || y >= this.height)
         return;
-      const idx = Math.floor(pos.x) + this.width * Math.floor(pos.y);
+      const idx = x + this.width * y;
+      if (idx !== idx)
+        throw new Error('Trying to add NaN as a line pixel index');
       indices.add(idx);
     };
     const pos = { x: line.x0, y: line.y0 };
