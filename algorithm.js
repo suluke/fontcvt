@@ -94,36 +94,40 @@ export class CharApproximation {
       const idx = iterator.next().value;
       const x = idx % this.width;
       const y = Math.floor(idx / this.width);
-      visitor(x, y);
+      if (x !== x || y !== y)
+        throw new Error('Encountered line coordinates which are NaN');
+      const res = visitor(x, y, idx);
+      // Bailing mechanism
+      if (res === false)
+        break;
     }
   }
   computeCover(line) {
     const cover = new Cover();
     const l1 = { x: line.x0, y: line.y0};
     const l2 = { x: line.x1, y: line.y1};
-    this.visitLinePixels((x, y) => {
+    this.visitLinePixels((x, y, idx) => {
       // pixels always have integer coordinates, so don't forget to add .5
-      const dist = pointToLineDist({x: x + .5, y: y + .5}, l1, l2);
+      const p = {x: x + .5, y: y + .5};
+      const dist = pointToLineDist(p, l1, l2);
       if (dist !== dist)
-        throw new Error();
-      const maxCover = Math.max(this.strokeWidth - 2 * dist, 0);
-      const idx = x + this.width * y;
-      const remainingCover = Math.min(this.remainingInk[idx], maxCover);
-      const allCover = Math.min(this.allInk[idx], maxCover);
-      cover.newCover += remainingCover;
-      cover.totalCover += allCover;
+        throw new Error('Computed NaN as distance from point to line');
+      const thisCover = Math.max(this.strokeWidth - 2 * dist, 0);
+      const remainingInk = this.remainingInk[idx];
+      const allInk = this.allInk[idx];
+      cover.newCover += Math.min(remainingInk, thisCover);
+      cover.totalCover += Math.min(allInk, thisCover);
     }, line);
     return cover;
   }
   commitLine(line) {
     const l1 = { x: line.x0, y: line.y0};
     const l2 = { x: line.x1, y: line.y1};
-    this.visitLinePixels((x, y) => {
+    this.visitLinePixels((x, y, idx) => {
       const dist = pointToLineDist({x: x + .5, y: y + .5}, l1, l2);
-      const maxCover = Math.max(this.strokeWidth - 2 * dist, 0);
-      const idx = this.width * y + x;
-      const remainingCover = Math.min(this.remainingInk[idx], maxCover);
-      this.remainingInk[idx] -= remainingCover;
+      const thisCover = Math.max(this.strokeWidth - 2 * dist, 0);
+      const remaining = Math.min(this.remainingInk[idx], thisCover);
+      this.remainingInk[idx] -= remaining;
     }, line);
   }
   addNewLine() {
