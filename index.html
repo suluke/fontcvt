@@ -5,19 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
-    Usage: Enter a character below and press the button as often as you like<br/>
-    <input type="text" id="fontcvt-input-char"/>
-    <button type="button" id="fontcvt-btn-submit">GO!</button>
-    <br/>
-    <canvas id="fontcvt-canvas-grayscale"></canvas>
-    <canvas id="fontcvt-canvas-remaining"></canvas>
-    <canvas id="fontcvt-canvas-lines"></canvas>
-    Lines: <span id="fontcvt-text-numlines"></span>
-    Loss: <span id="fontcvt-text-loss"></span>
-    <br/>
+    <section id="fontcvt-section-font-converter">
+      <h1>Convert Whole Font</h1>
+    </section>
+    <section id="fontcvt-section-visualizer">
+      <h1>Step-by-Step</h1>
+      <p>
+        Usage: Enter a character below and press the button multiple times
+        to see the algorithm work step-by-step
+      </p>
+      <input type="text" class="fontcvt-visualizer-input-char"/>
+      <button type="button" class="fontcvt-visualizer-btn-submit">GO!</button>
+      <br/>
+      <canvas class="fontcvt-visualizer-canvas-grayscale"></canvas>
+      <canvas class="fontcvt-visualizer-canvas-remaining"></canvas>
+      <canvas class="fontcvt-visualizer-canvas-lines"></canvas>
+      Lines: <span class="fontcvt-visualizer-text-numlines"></span>
+      Loss: <span class="fontcvt-visualizer-text-loss"></span>
+    </section>
     <script type="module" src="./mersenne-twister.js"></script>
-    <script type="module" src="./utils.js"></script>
     <script type="module" src="./priority-queue.js"></script>
+    <script type="module" src="./utils.js"></script>
     <script type="module" src="./algorithm.js"></script>
     <script type="module" src="./main.js"></script>
   </body>

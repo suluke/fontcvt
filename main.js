@@ -10,15 +10,16 @@ const Font = 'serif';
 
 class FontConverter {
   constructor() {
+    this.container = document.getElementById('fontcvt-section-font-converter');
     this.charcvt = new CharApproximator(Bounds.width, Bounds.height, NumLines);
     for (let i = 0; i < ASCII.length; i++) {
       const char = ASCII.charAt(i);
       const charCanvas = this.makeCharCanvas(char);
-      document.body.appendChild(charCanvas);
+      this.container.appendChild(charCanvas);
       const algolines = this.charcvt.approximate(char, Font);
       const linesCanvas = this.makeLinesCanvas(algolines);
-      document.body.appendChild(linesCanvas);
-      //document.body.appendChild(document.createElement('br'));
+      this.container.appendChild(linesCanvas);
+      //this.container.appendChild(document.createElement('br'));
       this.colorize = false;
     }
   }
@@ -57,13 +58,15 @@ new FontConverter();
 
 class Visualizer {
   constructor() {
-    this.submitBtn = document.getElementById('fontcvt-btn-submit');
-    this.charInput = document.getElementById('fontcvt-input-char');
-    this.grayscaleCanvas = document.getElementById('fontcvt-canvas-grayscale');
-    this.remainingCanvas = document.getElementById('fontcvt-canvas-remaining');
-    this.linesCanvas = document.getElementById('fontcvt-canvas-lines');
-    this.numLinesDisplay = document.getElementById('fontcvt-text-numlines');
-    this.lossDisplay = document.getElementById('fontcvt-text-loss');
+    const ClassPrefix = 'fontcvt-visualizer';
+    this.container = document.getElementById('fontcvt-section-visualizer');
+    this.submitBtn = this.container.querySelector(`.${ClassPrefix}-btn-submit`);
+    this.charInput = this.container.querySelector(`.${ClassPrefix}-input-char`);
+    this.grayscaleCanvas = this.container.querySelector(`.${ClassPrefix}-canvas-grayscale`);
+    this.remainingCanvas = this.container.querySelector(`.${ClassPrefix}-canvas-remaining`);
+    this.linesCanvas = this.container.querySelector(`.${ClassPrefix}-canvas-lines`);
+    this.numLinesDisplay = this.container.querySelector(`.${ClassPrefix}-text-numlines`);
+    this.lossDisplay = this.container.querySelector(`.${ClassPrefix}-text-loss`);
     const { width, height } = Bounds;
     const {
       submitBtn, charInput,
