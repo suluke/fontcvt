@@ -102,6 +102,12 @@ export class CharApproximation {
         break;
     }
   }
+  getPixelCoverForLine(p, l1, l2) {
+    const dist = pointToLineDist(p, l1, l2);
+    if (dist !== dist)
+      throw new Error('Computed NaN as distance from point to line');
+    return Math.max(this.strokeWidth - dist, 0);
+  }
   computeCover(line) {
     const cover = new Cover();
     const l1 = { x: line.x0, y: line.y0};
@@ -109,10 +115,7 @@ export class CharApproximation {
     this.visitLinePixels((x, y, idx) => {
       // pixels always have integer coordinates, so don't forget to add .5
       const p = {x: x + .5, y: y + .5};
-      const dist = pointToLineDist(p, l1, l2);
-      if (dist !== dist)
-        throw new Error('Computed NaN as distance from point to line');
-      const thisCover = Math.max(this.strokeWidth - 2 * dist, 0);
+      const thisCover = this.getPixelCoverForLine(p, l1, l2);
       const remainingInk = this.remainingInk[idx];
       const allInk = this.allInk[idx];
       cover.newCover += Math.min(remainingInk, thisCover);
@@ -124,8 +127,8 @@ export class CharApproximation {
     const l1 = { x: line.x0, y: line.y0};
     const l2 = { x: line.x1, y: line.y1};
     this.visitLinePixels((x, y, idx) => {
-      const dist = pointToLineDist({x: x + .5, y: y + .5}, l1, l2);
-      const thisCover = Math.max(this.strokeWidth - 2 * dist, 0);
+      const p = {x: x + .5, y: y + .5};
+      const thisCover = this.getPixelCoverForLine(p, l1, l2);
       const remaining = Math.min(this.remainingInk[idx], thisCover);
       this.remainingInk[idx] -= remaining;
     }, line);

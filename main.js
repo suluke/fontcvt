@@ -194,3 +194,53 @@ class Visualizer {
   }
 }
 new Visualizer();
+
+class LinePixelsVisualizer {
+  constructor() {
+    const ClassPrefix = 'fontcvt-linepixels';
+    const canvasWidth = 200;
+    const canvasHeight = 200;
+    this.container = document.getElementById('fontcvt-section-linepixels');
+    this.genBtn = this.container.querySelector(`.${ClassPrefix}-btn-generate`);
+    this.refCanvas = this.container.querySelector(`.${ClassPrefix}-canvas-reference`);
+    this.algoCanvas = this.container.querySelector(`.${ClassPrefix}-canvas-algorithm`);
+
+    this.approx = new CharApproximation([], canvasWidth, canvasHeight);
+
+    this.refCanvas.width = canvasWidth;
+    this.refCanvas.height = canvasHeight;
+    this.algoCanvas.width = canvasWidth;
+    this.algoCanvas.height = canvasHeight;
+
+    const refCtx = this.refCanvas.getContext('2d');
+    const algoCtx = this.algoCanvas.getContext('2d');
+
+    this.genBtn.addEventListener('click', () => {
+      const width = canvasWidth;
+      const height = canvasHeight;
+      const x0 = Math.random()* width;
+      const y0 = Math.random()* height;
+      const x1 = Math.random()* width;
+      const y1 = Math.random()* height;
+      refCtx.clearRect(0, 0, width, height);
+      refCtx.beginPath();
+      refCtx.moveTo(x0, y0);
+      refCtx.lineTo(x1, y1);
+      refCtx.closePath();
+      refCtx.stroke();
+
+      algoCtx.clearRect(0, 0, width, height);
+      const imgData = algoCtx.getImageData(0, 0, width, height);
+      const line = {x0, y0, x1, y1};
+      const l1 = {x: x0, y: y0};
+      const l2 = {x: x1, y: y1};
+      this.approx.visitLinePixels((x, y, idx) => {
+        const p = {x: x + .5, y: y + .5};
+        const cover = this.approx.getPixelCoverForLine(p, l1, l2);
+        imgData.data[4 * idx + 3] = cover * 255;
+      }, line);
+      algoCtx.putImageData(imgData, 0, 0);
+    });
+  }
+}
+new LinePixelsVisualizer();

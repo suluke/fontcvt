@@ -23,6 +23,16 @@
       Lines: <span class="fontcvt-visualizer-text-numlines"></span>
       Loss: <span class="fontcvt-visualizer-text-loss"></span>
     </section>
+    <section id="fontcvt-section-linepixels">
+      <h1>Test What the Algorithm Thinks is a Line</h1>
+      <p>
+        Left: Line drawn by the browser. Right: Line drawn by our algorithm.
+      </p>
+      <button type="button" class="fontcvt-linepixels-btn-generate">Show Random Line</button>
+      <br>
+      <canvas class="fontcvt-linepixels-canvas-reference"></canvas>
+      <canvas class="fontcvt-linepixels-canvas-algorithm"></canvas>
+    </section>
     <script type="module" src="./mersenne-twister.js"></script>
     <script type="module" src="./priority-queue.js"></script>
     <script type="module" src="./utils.js"></script>
