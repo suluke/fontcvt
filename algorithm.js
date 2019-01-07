@@ -48,6 +48,7 @@ export class CharApproximation {
   /// is provided as third parameter to the visitor as well.
   visitLinePixels(visitor, line) {
     const vec = { dx: line.x1 - line.x0, dy: line.y1 - line.y0 }
+    // If line is a point we're lazy (and eliminate some special cases)
     if (vec.dx === 0 && vec.dy === 0) {
       const x = Math.floor(line.x0);
       const y = Math.floor(line.y0);
@@ -106,9 +107,12 @@ export class CharApproximation {
     const dist = pointToLineDist(p, l1, l2);
     if (dist !== dist)
       throw new Error('Computed NaN as distance from point to line');
-    return Math.max(this.strokeWidth - dist, 0);
+    if (dist > 3 * this.strokeWidth)
+      throw new Error(`Getting cover for pixel which is ${dist} units far away from line`);
+    return Math.max(this.strokeWidth - dist / 1.5, 0);
   }
   computeCover(line) {
+    const OVERDRAW_THRESHOLD = 0.55;
     const cover = new Cover();
     const l1 = { x: line.x0, y: line.y0};
     const l2 = { x: line.x1, y: line.y1};
@@ -118,6 +122,12 @@ export class CharApproximation {
       const thisCover = this.getPixelCoverForLine(p, l1, l2);
       const remainingInk = this.remainingInk[idx];
       const allInk = this.allInk[idx];
+      if (-(allInk - thisCover) > OVERDRAW_THRESHOLD) {
+        // This line is illegal because it overdraws
+        cover.newCover = -1;
+        cover.totalCover = -1;
+        return false; // Stop iterating remaining line pixels
+      }
       cover.newCover += Math.min(remainingInk, thisCover);
       cover.totalCover += Math.min(allInk, thisCover);
     }, line);
