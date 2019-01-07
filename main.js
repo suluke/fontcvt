@@ -238,6 +238,12 @@ class LinePixelsVisualizer {
         const p = {x: x + .5, y: y + .5};
         const cover = this.approx.getPixelCoverForLine(p, l1, l2);
         imgData.data[4 * idx + 3] = cover * 255;
+        if (cover < 0.05) {
+          imgData.data[4 * idx + 0] = 255;
+          imgData.data[4 * idx + 1] = 0;
+          imgData.data[4 * idx + 2] = 0;
+          imgData.data[4 * idx + 3] = 255;
+        }
       }, line);
       algoCtx.putImageData(imgData, 0, 0);
     });
