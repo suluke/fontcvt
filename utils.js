@@ -50,8 +50,11 @@ export function pointToLineDist(p, v, w) {
   function sub(v, w) {
     return { x: v.x - w.x, y: v.y - w.y };
   }
+  function lenSq(v) {
+    return Math.pow(v.x, 2) + Math.pow(v.y, 2);
+  }
   function len(v) {
-    return Math.sqrt(Math.pow(v.x, 2), Math.pow(v.y, 2));
+    return Math.sqrt(lenSq(v));
   }
   function distance(v, w) {
     return len(sub(v, w));
@@ -60,7 +63,7 @@ export function pointToLineDist(p, v, w) {
     return v.x * w.x + v.y * w.y;
   }
   // Return minimum distance between line segment vw and point p
-  const l2 = Math.pow(distance(v, w), 2.);  // i.e. |w-v|^2 -  avoid a sqrt
+  const l2 = lenSq(sub(v, w));  // i.e. |w-v|^2 -  avoid a sqrt
   if (l2 == 0.)
     return distance(p, v);   // v == w case
   // Consider the line extending the segment, parameterized as v + t (w - v).
