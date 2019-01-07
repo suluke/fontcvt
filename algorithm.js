@@ -112,7 +112,7 @@ export class CharApproximation {
     return Math.max(this.strokeWidth - dist / 1.5, 0);
   }
   computeCover(line) {
-    const OVERDRAW_THRESHOLD = 0.55;
+    const OVERDRAW_THRESHOLD = 0.7;
     const cover = new Cover();
     const l1 = { x: line.x0, y: line.y0};
     const l2 = { x: line.x1, y: line.y1};
@@ -184,9 +184,13 @@ export class CharApproximation {
     };
     while (iterate(l))
       continue;
+    const cover = this.computeCover(l);
+    if (cover.newCover <= 0)
+      return false;
     this.commitLine(l);
     this.lines.push([l.x0 / width - .5, l.y0 / height - .5,
                      l.x1 / width - .5, l.y1 / height - .5]);
+    return true;
   }
   createLines(numLines) {
     for(let i = 0; i < numLines; i++)
