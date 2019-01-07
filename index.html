@@ -7,6 +7,15 @@
   <body>
     <section id="fontcvt-section-font-converter">
       <h1>Convert Whole Font</h1>
+      <label>Font: <input type="text" value="serif" class="fontcvt-font-converter-input-font"/></label>
+      <label>Number of lines: <input type="number" min="1" max="100" step="1" value="16" class="fontcvt-font-converter-input-numlines"/></label>
+      <br/>
+      <button type-"button" class="fontcvt-font-converter-btn-convert">Convert</button>
+      <br/>
+      Maximum loss per letter: <span class="fontcvt-font-converter-letterloss"></span>
+      <br/>
+      Global loss: <span class="fontcvt-font-converter-globalloss"></span>
+      <div class="fontcvt-font-converter-letters"></div>
     </section>
     <section id="fontcvt-section-visualizer">
       <h1>Step-by-Step</h1>

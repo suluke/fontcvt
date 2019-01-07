@@ -3,34 +3,65 @@ import CharApproximator, { CharApproximation } from './algorithm.js';
 
 const Bounds = { width: 12, height: 18 };
 const NumLineElts = 4;
-const NumLines = 32;
 
 const ASCII = '!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
-const Font = 'serif';
 
 class FontConverter {
   constructor() {
+    const ClassPrefix = 'fontcvt-font-converter';
     this.container = document.getElementById('fontcvt-section-font-converter');
-    this.charcvt = new CharApproximator(Bounds.width, Bounds.height, NumLines);
+    this.fontInput = this.container.querySelector(`.${ClassPrefix}-input-font`);
+    this.numLinesInput = this.container.querySelector(`.${ClassPrefix}-input-numlines`);
+    this.letterLossDisplay = this.container.querySelector(`.${ClassPrefix}-letterloss`);
+    this.globalLossDisplay = this.container.querySelector(`.${ClassPrefix}-globalloss`);
+    this.convertBtn = this.container.querySelector(`.${ClassPrefix}-btn-convert`);
+    this.lettersContainer = this.container.querySelector(`.${ClassPrefix}-letters`);
+    this.convertBtn.addEventListener('click', () => {
+      this.convert();
+    });
+    this.colorize = false;
+    this.breakAfterLetter = false;
+    this.convert();
+  }
+  convert() {
+    const { width, height } = Bounds;
+    this.lettersContainer.innerHTML = '';
+    const numLines = parseInt(this.numLinesInput.value);
+    const font = this.fontInput.value;
+    const charcvt = new CharApproximator(width, height, numLines);
+    let maxLetterLoss = 0;
+    let maxLossLetter = '';
+    let globalLoss = 0;
     for (let i = 0; i < ASCII.length; i++) {
       const char = ASCII.charAt(i);
-      const charCanvas = this.makeCharCanvas(char);
-      this.container.appendChild(charCanvas);
-      const algolines = this.charcvt.approximate(char, Font);
+      const charCanvas = this.makeCharCanvas(char, font);
+      this.lettersContainer.appendChild(charCanvas);
+      const grayscale = charcvt.convertToGrayscale(char, font);
+      const approx = new CharApproximation(grayscale, width, height);
+      approx.createLines(numLines);
+      const algolines = approx.lines;
+      const loss = approx.getLoss();
+      if (maxLetterLoss < loss) {
+        maxLetterLoss = loss;
+        maxLossLetter = char;
+      }
+      globalLoss += loss;
       const linesCanvas = this.makeLinesCanvas(algolines);
-      this.container.appendChild(linesCanvas);
-      //this.container.appendChild(document.createElement('br'));
-      this.colorize = false;
+      this.lettersContainer.appendChild(linesCanvas);
+      if (this.breakAfterLetter)
+        this.lettersContainer.appendChild(document.createElement('br'));
     }
+    this.letterLossDisplay.innerHTML = `${maxLetterLoss.toFixed(3)} (in '${maxLossLetter}')`;
+    this.globalLossDisplay.innerHTML = `${globalLoss.toFixed(3)}`;
   }
-  makeCharCanvas(char) {
+  makeCharCanvas(char, font) {
     const { width, height } = Bounds;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
     ctx.lineWidth = 1;
-    ctx.font = `${width}px ${Font}`;
+    ctx.font = `${width}px ${font}`;
     ctx.fillText(char, 0, height * .75);
     return canvas;
   }
@@ -81,7 +112,7 @@ class Visualizer {
     this.grayscaleCtx = grayscaleCanvas.getContext('2d');
     this.remainingCtx = remainingCanvas.getContext('2d');
     this.linesCtx = linesCanvas.getContext('2d');
-    this.charcvt = new CharApproximator(Bounds.width, Bounds.height, NumLines);
+    this.charcvt = new CharApproximator(Bounds.width, Bounds.height, /* doesn't matter: */ 16);
     this.currentChar = '';
     this.grayscale = null;
     this.approximation = null;
@@ -110,7 +141,7 @@ class Visualizer {
     const { grayscaleCtx } = this;
     const { width, height } = Bounds;
     const char = this.currentChar;
-    const grayscale = this.charcvt.convertToGrayscale(char, Font);
+    const grayscale = this.charcvt.convertToGrayscale(char, 'serif');
     const imgData = grayscaleCtx.createImageData(width, height);
     for (let i = 0; i < grayscale.length; i++) {
       imgData.data[4 * i + 0] = 255 - grayscale[i] * 255;
